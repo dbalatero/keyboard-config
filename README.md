@@ -6,6 +6,10 @@ This is a thin layer on top of the `qmk_firmware` repo. QMK encourages modifying
 
 Run `./qmk setup` after cloning the repo. Answer `Y` (yes) to all the prompts.
 
+It will clone a local copy of `qmk_firmware` into this repo.
+
+You can update `qmk_firmware` at any time by `cd`ing to the directory and running `git pull.`
+
 ## Adding a new keymap
 
 If you want to add a new keymap for a new keyboard:
