@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+brew install qmk/qmk/qmk
+
+REPO_DIR="$(realpath "$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." >/dev/null 2>&1 && pwd )")"
+export QMK_HOME="$REPO_DIR/qmk_firmware"
+
+qmk setup
