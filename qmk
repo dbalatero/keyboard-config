@@ -8,57 +8,62 @@ function qmk_setup() {
   qmk setup
 }
 
-function qmk_compile_keyboard() {
+function qmk_clone() {
   local keyboard=$1
-  local keymap_dir=$2
+  local destination="$REPO_DIR/$2"
 
-  local qmk_keymaps_dir="$QMK_HOME/keyboards/$keyboard/keymaps"
-  local keymap_name="$USER"
+  cp -r "$QMK_HOME/keyboards/$keyboard/keymaps/default" "$destination"
 
-  ln -sf "$keymap_dir" "$qmk_keymaps_dir/$keymap_name"
-
-  echo "compiling $keyboard from $keymap_dir"
-  qmk compile -kb "$keyboard" -km "$keymap_name"
+  echo "$keyboard" > "$destination/KEYBOARD"
 }
 
 function qmk_compile() {
   local keyboard=$1
 
-  case $keyboard in
-    dactyl_6x6*)
-      qmk_compile_keyboard handwired/dactyl_manuform/6x6 "$REPO_DIR/dactyl_6x6"
-      ;;
-    *)
-      echo "unknown keyboard: $2 - please add to qmk_compile in ./qmk"
-      exit 1
-      ;;
-  esac
+  if [ ! -d "$keyboard" ]; then
+    echo "unknown keyboard: $keyboard"
+    exit 1
+  fi
+
+  local qmk_keyboard_name=$(cat "$keyboard/KEYBOARD")
+  local qmk_keymaps_dir="$QMK_HOME/keyboards/$qmk_keyboard_name/keymaps"
+  local keymap_name="$USER"
+
+  ln -sf "$keyboard" "$qmk_keymaps_dir/$keymap_name"
+
+  echo "compiling $keyboard..."
+  qmk compile -kb "$qmk_keyboard_name" -km "$keymap_name"
 }
 
 function qmk_flash() {
   local keyboard=$1
 
-  case $keyboard in
-    dactyl_6x6*)
-      qmk flash -kb handwired/dactyl_manuform/6x6 -km "$USER"
-      ;;
-    *)
-      echo "unknown keyboard: $2 - please add to qmk_compile in ./qmk"
-      exit 1
-      ;;
-  esac
+  if [ ! -d "$keyboard" ]; then
+    echo "unknown keyboard: $keyboard"
+    exit 1
+  fi
+
+  local qmk_keyboard_name=$(cat "$keyboard/KEYBOARD")
+
+  qmk flash -kb "$qmk_keyboard_name" -km "$USER"
 }
 
 function qmk_usage() {
   echo "Usage: ./qmk [command]"
   echo
   echo "Commands:"
-  echo "  qmk setup - sets up the repo for the first time"
+  echo "  setup - sets up the repo for the first time"
+  echo "  clone [kb name] [destination] - clones a keyboard's default mapping to this repo"
+  echo "  compile [mapping dir] - compiles a .hex file for your local mapping"
+  echo "  flash [mapping dir] - flashes the compiled .hex file for your local mapping"
 }
 
 case $1 in
   setup)
     qmk_setup
+    ;;
+  clone)
+    qmk_clone $2 $3
     ;;
   compile)
     qmk_compile $2
