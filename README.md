@@ -1,6 +1,6 @@
 # keyboard-config
 
-QMK keyboard configs
+This is a thin layer on top of the `qmk_firmware` repo. QMK encourages modifying their repo with your own keymaps, which is pretty heavy and dumb. This repo lets you define your own keymaps separately from QMK's firmware, and the provided `./qmk` script will take care of symlinking your custom keymaps into `qmk_firmware` so that they still build correctly.
 
 ## Setup
 
