@@ -29,7 +29,11 @@ function qmk_compile() {
   local qmk_keymaps_dir="$QMK_HOME/keyboards/$qmk_keyboard_name/keymaps"
   local keymap_name="$USER"
 
-  ln -sf "$keyboard" "$qmk_keymaps_dir/$keymap_name"
+  local destination_link="$qmk_keymaps_dir/$keymap_name"
+
+  if [ ! -d "$destination_link" ]; then
+    ln -sf "$REPO_DIR/$keyboard" "$destination_link"
+  fi
 
   echo "compiling $keyboard..."
   qmk compile -kb "$qmk_keyboard_name" -km "$keymap_name"
