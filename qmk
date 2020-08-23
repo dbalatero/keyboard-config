@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+
+REPO_DIR="$(realpath "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )")"
+export QMK_HOME="$REPO_DIR/qmk_firmware"
+
+function qmk_setup() {
+  brew install qmk/qmk/qmk
+  qmk setup
+}
+
+function qmk_compile_keyboard() {
+  local keyboard=$1
+  local keymap_dir=$2
+
+  local qmk_keymaps_dir="$QMK_HOME/keyboards/$keyboard/keymaps"
+  local keymap_name="$USER"
+
+  ln -sf "$keymap_dir" "$qmk_keymaps_dir/$keymap_name"
+
+  echo "compiling $keyboard from $keymap_dir"
+  qmk compile -kb "$keyboard" -km "$keymap_name"
+}
+
+function qmk_compile() {
+  local keyboard=$1
+
+  case $keyboard in
+    dactyl_6x6*)
+      qmk_compile_keyboard handwired/dactyl_manuform/6x6 "$REPO_DIR/dactyl_6x6"
+      ;;
+    *)
+      echo "unknown keyboard: $2 - please add to qmk_compile in ./qmk"
+      exit 1
+      ;;
+  esac
+}
+
+function qmk_flash() {
+  local keyboard=$1
+
+  case $keyboard in
+    dactyl_6x6*)
+      qmk flash -kb handwired/dactyl_manuform/6x6 -km "$USER"
+      ;;
+    *)
+      echo "unknown keyboard: $2 - please add to qmk_compile in ./qmk"
+      exit 1
+      ;;
+  esac
+}
+
+function qmk_usage() {
+  echo "Usage: ./qmk [command]"
+  echo
+  echo "Commands:"
+  echo "  qmk setup - sets up the repo for the first time"
+}
+
+case $1 in
+  setup)
+    qmk_setup
+    ;;
+  compile)
+    qmk_compile $2
+    ;;
+  flash)
+    qmk_flash $2
+    ;;
+  *)
+    qmk_usage
+    ;;
+esac
