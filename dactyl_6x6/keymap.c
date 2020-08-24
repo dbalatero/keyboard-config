@@ -7,15 +7,33 @@
 #define RAISE MO(_RAISE)
 #define LOWER MO(_LOWER)
 
+#define KC_SUPER (KC_LCTRL | KC_LGUI | KC_LALT)
+
 // Combination ctrl when held, enter when tapped
 #define HYPER_SEMI MT(MOD_HYPR, KC_SCLN)
 
 // TODO
 // super
-// fn key
 // arrow key layer
 // leader key for layer?
 
+// Thumb clusters, match to the comments in the keymaps
+//
+//         +----+
+// +----+  |    |                                          +-----+
+// |    |  | 2  | +----+                                   |     | +----+
+// | 1  |  |    | |    |                           +-----+ | 7   | |    |
+// |    |  +----+ | 3  |                           |     | |     | | 8  |
+// +----+         |    | +----+             +----+ | 10  | +-----+ |    |
+//                +----+ |    |             |    | |     |         +----+
+//            +----+     | 4  |             | 9  | +-----+
+//            |    |     |    |             |    |        +----+
+//            | 5  |     +----+             +----+        | 12 |
+//            +----++-----+                        +----+ |    |
+//                  |     |                        |    | +----+
+//                  | 6   |                        |11  |
+//                  +-----+                        +----+
+//
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [_QWERTY] = LAYOUT_6x6(
      KC_ESC    , KC_F2 , KC_F3 , KC_F4 , KC_F5 , KC_F6 ,                         KC_F7 , KC_F8 , KC_F9  , KC_F10 , KC_F11 , KC_F12 ,
@@ -25,9 +43,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      KC_LSHIFT , KC_Z  , KC_X  , KC_C  , KC_V  , KC_B  ,                         KC_N  , KC_M  , KC_COMM, KC_DOT , KC_SLSH, KC_RSHIFT,
                         _______, KC_GRAVE,                                                       KC_LBRC, KC_RBRC ,
 
+                                      // 1         2                               7         8
                                       KC_LCTRL, KC_LGUI,                        KC_BSPACE, KC_SPACE,
-                                        _______, KC_LALT,                     _______,  _______,
-                                          KC_BSPC, KC_GRV,                  _______, KC_F1
+                                        // 3       4                          9     10
+                                        KC_LALT, _______,                     KC_SUPER, _______,
+                                          // 5      6                       11    12
+                                          _______, _______,                  KC_F1, _______
   ),
 
   [_LOWER] = LAYOUT_6x6(
