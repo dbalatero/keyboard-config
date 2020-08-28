@@ -21,3 +21,4 @@ SLEEP_LED_ENABLE = no    # Breathing sleep LED during USB suspend
 
 # Enable the Elite-C board
 BOOTLOADER = atmel-dfu
+COMBO_ENABLE = yes
