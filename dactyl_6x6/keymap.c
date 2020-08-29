@@ -11,6 +11,44 @@
 // Combination ctrl when held, enter when tapped
 #define HYPER_SEMI HYPR_T(KC_SCLN)
 
+// Handle the combination ctrl or raise
+enum custom_keycodes {
+  CTRL_OR_RAISE = SAFE_RANGE
+};
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+  static uint16_t my_hash_timer;
+
+  switch (keycode) {
+    case CTRL_OR_RAISE:
+      if (record->event.pressed) {
+        my_hash_timer = timer_read();
+        register_code(KC_LCTL); // Hold down ctrl
+      } else {
+        unregister_code(KC_LCTL); // Cancel ctrl being held
+
+        if (timer_elapsed(my_hash_timer) < TAPPING_TERM) {
+          // toggle the raise layer on
+          layer_invert(_RAISE);
+        }
+      }
+
+      return false;
+
+    case KC_ENTER:
+      if (record->event.pressed) {
+        // Turn off the raise layer if you hit Enter (e.g. scrolling through a
+        // menu with the arrow keys and you hit Enter)
+        layer_off(_RAISE);
+      }
+
+      return true;
+  }
+
+  // Pass through all other keys
+  return true;
+}
+
 // TODO
 // super
 // arrow key layer
@@ -42,8 +80,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      KC_LSHIFT , KC_Z  , KC_X  , KC_C  , KC_V  , KC_B  ,                         KC_N  , KC_M  , KC_COMM, KC_DOT , KC_SLSH, KC_RSHIFT,
                         _______, KC_GRAVE,                                                       KC_LBRC, KC_RBRC ,
 
-                                      // 1         2                               7         8
-                                      KC_LCTRL, KC_LGUI,                        KC_BSPACE, KC_SPACE,
+                                      // 1         2                               7          8
+                                      CTRL_OR_RAISE, KC_LGUI,                      KC_BSPACE, KC_SPACE,
                                         // 3       4                          9     10
                                         KC_LALT, _______,                     KC_SUPER, _______,
                                           // 5      6                       11    12
