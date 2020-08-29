@@ -14,6 +14,16 @@ enum custom_keycodes {
   MOD_SUPER
 };
 
+void enable_raise_layer() {
+  SEND_STRING(SS_TAP(X_F21));
+  layer_on(_RAISE);
+}
+
+void disable_raise_layer() {
+  SEND_STRING(SS_TAP(X_F22));
+  layer_off(_RAISE);
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   static uint16_t ctrl_raise_timer;
 
@@ -40,7 +50,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
         if (timer_elapsed(ctrl_raise_timer) < TAPPING_TERM) {
           // toggle the raise layer on
-          layer_invert(_RAISE);
+          enable_raise_layer();
         }
       }
 
@@ -50,7 +60,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       if (record->event.pressed) {
         // Turn off the raise layer if you hit Enter (e.g. scrolling through a
         // menu with the arrow keys and you hit Enter)
-        layer_off(_RAISE);
+        disable_raise_layer();
       }
 
       return true;
