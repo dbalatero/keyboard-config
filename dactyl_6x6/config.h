@@ -27,7 +27,4 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // Rows are doubled-up
 
 #define TAPPING_TERM 140
-#define COMBO_COUNT 1
-
-void enable_raise_layer(void);
-void disable_raise_layer(void);
+#define COMBO_COUNT 0

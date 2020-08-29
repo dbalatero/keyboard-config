@@ -14,6 +14,9 @@ enum custom_keycodes {
   MOD_SUPER
 };
 
+void enable_raise_layer(void);
+void disable_raise_layer(void);
+
 void enable_raise_layer() {
   SEND_STRING(SS_TAP(X_F21));
   layer_on(_RAISE);
