@@ -18,12 +18,12 @@ void enable_raise_layer(void);
 void disable_raise_layer(void);
 
 void enable_raise_layer() {
-  SEND_STRING(SS_TAP(X_F21));
+  SEND_STRING(SS_TAP(X_F17));
   layer_on(_RAISE);
 }
 
 void disable_raise_layer() {
-  SEND_STRING(SS_TAP(X_F22));
+  SEND_STRING(SS_TAP(X_F18));
   layer_off(_RAISE);
 }
 
