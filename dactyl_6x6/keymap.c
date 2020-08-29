@@ -15,7 +15,7 @@ enum custom_keycodes {
 };
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-  static uint16_t my_hash_timer;
+  static uint16_t ctrl_raise_timer;
 
   switch (keycode) {
     case MOD_SUPER:
@@ -33,12 +33,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
     case CTRL_OR_RAISE:
       if (record->event.pressed) {
-        my_hash_timer = timer_read();
+        ctrl_raise_timer = timer_read();
         register_code(KC_LCTL); // Hold down ctrl
       } else {
         unregister_code(KC_LCTL); // Cancel ctrl being held
 
-        if (timer_elapsed(my_hash_timer) < TAPPING_TERM) {
+        if (timer_elapsed(ctrl_raise_timer) < TAPPING_TERM) {
           // toggle the raise layer on
           layer_invert(_RAISE);
         }
