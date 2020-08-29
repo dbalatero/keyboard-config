@@ -5,21 +5,32 @@
 
 #define RAISE TG(_RAISE)
 
-// Define super key as ctrl, cmd, alt
-#define KC_SUPER LCTL(LGUI(KC_LALT))
-
 // Combination ctrl when held, enter when tapped
 #define HYPER_SEMI HYPR_T(KC_SCLN)
 
 // Handle the combination ctrl or raise
 enum custom_keycodes {
-  CTRL_OR_RAISE = SAFE_RANGE
+  CTRL_OR_RAISE = SAFE_RANGE,
+  MOD_SUPER
 };
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   static uint16_t my_hash_timer;
 
   switch (keycode) {
+    case MOD_SUPER:
+      if (record->event.pressed) {
+        register_code(KC_LCTL);
+        register_code(KC_LGUI);
+        register_code(KC_LALT);
+      } else {
+        unregister_code(KC_LCTL);
+        unregister_code(KC_LGUI);
+        unregister_code(KC_LALT);
+      }
+
+      return false;
+
     case CTRL_OR_RAISE:
       if (record->event.pressed) {
         my_hash_timer = timer_read();
@@ -50,9 +61,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 }
 
 // TODO
-// super
 // arrow key layer
-// leader key for layer?
 
 // Thumb clusters, match to the comments in the keymaps
 //
@@ -82,8 +91,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
                                       // 1         2                               7          8
                                       CTRL_OR_RAISE, KC_LGUI,                      KC_BSPACE, KC_SPACE,
-                                        // 3       4                          9     10
-                                        KC_LALT, _______,                     KC_SUPER, _______,
+                                        // 3     4                            9        10
+                                        KC_LALT, _______,                     _______, MOD_SUPER,
                                           // 5      6                       11    12
                                           _______, _______,                  KC_F1, RAISE
   ),
