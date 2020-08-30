@@ -16,6 +16,7 @@ enum custom_keycodes {
 
 void enable_raise_layer(void);
 void disable_raise_layer(void);
+void toggle_raise_layer(void);
 
 void enable_raise_layer() {
   SEND_STRING(SS_TAP(X_F17));
@@ -25,6 +26,14 @@ void enable_raise_layer() {
 void disable_raise_layer() {
   SEND_STRING(SS_TAP(X_F18));
   layer_off(_RAISE);
+}
+
+void toggle_raise_layer() {
+  if (IS_LAYER_ON(_RAISE)) {
+    disable_raise_layer();
+  } else {
+    enable_raise_layer();
+  }
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
@@ -53,7 +62,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
         if (timer_elapsed(ctrl_raise_timer) < TAPPING_TERM) {
           // toggle the raise layer on
-          enable_raise_layer();
+          toggle_raise_layer();
         }
       }
 
@@ -63,7 +72,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       if (record->event.pressed) {
         // Turn off the raise layer if you hit Enter (e.g. scrolling through a
         // menu with the arrow keys and you hit Enter)
-        disable_raise_layer();
+        if (IS_LAYER_ON(_RAISE)) {
+          disable_raise_layer();
+        }
       }
 
       return true;
