@@ -3,19 +3,18 @@
 #define _QWERTY 0
 #define _RAISE 1
 
-// Combination ctrl when held, enter when tapped
-#define HYPER_SEMI HYPR_T(KC_SCLN)
-
 // Handle the combination ctrl or raise
 enum custom_keycodes {
   CTRL_OR_RAISE = SAFE_RANGE,
   MOD_SUPER,
-  RAISE_OFF
+  RAISE_OFF,
+  HYPER_SEMI
 };
 
 void enable_raise_layer(void);
 void disable_raise_layer(void);
 void toggle_raise_layer(void);
+bool shift_is_down(void);
 
 void enable_raise_layer() {
   if (IS_LAYER_ON(_RAISE)) return;
@@ -39,10 +38,47 @@ void toggle_raise_layer() {
   }
 }
 
+bool shift_is_down() {
+  return get_mods() & MOD_MASK_SHIFT;
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   static uint16_t ctrl_raise_timer;
+  static uint16_t hyper_semi_timer;
+  static bool areWeHypering = false;
 
   switch (keycode) {
+    case HYPER_SEMI:
+      if (record->event.pressed) {
+        if (shift_is_down()) {
+          areWeHypering = false;
+
+          // "pass through a colon"
+          SEND_STRING(":");
+        } else {
+          hyper_semi_timer = timer_read();
+          areWeHypering = true;
+
+          register_code(KC_LCTL);
+          register_code(KC_LGUI);
+          register_code(KC_LALT);
+          register_code(KC_LSHIFT);
+        }
+      } else {
+        unregister_code(KC_LCTL);
+        unregister_code(KC_LGUI);
+        unregister_code(KC_LALT);
+        unregister_code(KC_LSHIFT);
+
+        if (areWeHypering && timer_elapsed(hyper_semi_timer) < TAPPING_TERM) {
+          SEND_STRING(";");
+        }
+
+        areWeHypering = false;
+      }
+
+      return false;
+
     case MOD_SUPER:
       if (record->event.pressed) {
         register_code(KC_LCTL);
