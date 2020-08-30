@@ -115,20 +115,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       return false;
 
     case KC_ENTER:
-      if (record->event.pressed) {
-        // Turn off the raise layer if you hit Enter (e.g. scrolling through a
-        // menu with the arrow keys and you hit Enter)
-        disable_raise_layer();
-      }
-
-      return true;
-
     case RAISE_OFF:
-      if (record->event.pressed) {
-        disable_raise_layer();
-      }
+      if (record->event.pressed) disable_raise_layer();
 
-      return false;
+      // Pass through all keypresses except RAISE_OFF, so that hitting Enter
+      // can also disable the layer.
+      return keycode != RAISE_OFF;
   }
 
   // Pass through all other keys
