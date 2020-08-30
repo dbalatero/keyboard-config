@@ -3,11 +3,12 @@
 #define _QWERTY 0
 #define _RAISE 1
 
+#define HYPER_SEMI MT(MOD_HYPR, KC_SCOLON)
+
 enum custom_keycodes {
   CTRL_OR_RAISE = SAFE_RANGE,
   MOD_SUPER,
-  RAISE_OFF,
-  HYPER_SEMI
+  RAISE_OFF
 };
 
 static bool ctrl_raise_other_key_pressed = false;
@@ -16,15 +17,13 @@ void enable_raise_layer(void);
 void disable_raise_layer(void);
 void toggle_raise_layer(void);
 
-bool handle_hyper_semi_key(keyrecord_t *record);
 bool handle_mod_super_key(keyrecord_t *record);
 bool handle_ctrl_raise_key(keyrecord_t *record);
-
-bool shift_is_down(void);
 
 void enable_raise_layer() {
   if (IS_LAYER_ON(_RAISE)) return;
 
+  // Send the OS the F17 key so we can toggle the visual indicator
   SEND_STRING(SS_TAP(X_F17));
   layer_on(_RAISE);
 }
@@ -32,7 +31,9 @@ void enable_raise_layer() {
 void disable_raise_layer() {
   if (IS_LAYER_OFF(_RAISE)) return;
 
+  // Send the OS the F18 key so we can toggle the visual indicator
   SEND_STRING(SS_TAP(X_F18));
+
   layer_off(_RAISE);
 }
 
@@ -42,35 +43,6 @@ void toggle_raise_layer() {
   } else {
     enable_raise_layer();
   }
-}
-
-bool shift_is_down() {
-  return get_mods() & MOD_MASK_SHIFT;
-}
-
-bool handle_hyper_semi_key(keyrecord_t *record) {
-  static uint16_t hyper_semi_timer;
-  static bool shift_originally_held = false;
-
-  if (record->event.pressed) {
-    shift_originally_held = shift_is_down();
-
-    if (shift_originally_held) return false;
-
-    // ctrl shift alt gui
-    hyper_semi_timer = timer_read();
-    register_mods(MOD_MASK_CSAG);
-  } else if (shift_originally_held) {
-    tap_code(KC_SCOLON);
-  } else {
-    unregister_mods(MOD_MASK_CSAG);
-
-    if (timer_elapsed(hyper_semi_timer) < TAPPING_TERM) {
-      tap_code(KC_SCOLON);
-    }
-  }
-
-  return false;
 }
 
 bool handle_mod_super_key(keyrecord_t *record) {
@@ -111,9 +83,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   if (keycode != CTRL_OR_RAISE) ctrl_raise_other_key_pressed = true;
 
   switch (keycode) {
-    case HYPER_SEMI:
-      return handle_hyper_semi_key(record);
-
     case MOD_SUPER:
       return handle_mod_super_key(record);
 
