@@ -15,9 +15,11 @@ static bool ctrl_raise_other_key_pressed = false;
 void enable_raise_layer(void);
 void disable_raise_layer(void);
 void toggle_raise_layer(void);
+
 bool handle_hyper_semi_key(keyrecord_t *record);
 bool handle_mod_super_key(keyrecord_t *record);
 bool handle_ctrl_raise_key(keyrecord_t *record);
+
 bool shift_is_down(void);
 
 void enable_raise_layer() {
