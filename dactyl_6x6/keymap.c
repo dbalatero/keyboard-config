@@ -13,6 +13,8 @@ enum custom_keycodes {
 void enable_raise_layer(void);
 void disable_raise_layer(void);
 void toggle_raise_layer(void);
+bool handle_hyper_semi_key(keyrecord_t *record);
+bool handle_mod_super_key(keyrecord_t *record);
 bool shift_is_down(void);
 
 void enable_raise_layer() {
@@ -41,12 +43,48 @@ bool shift_is_down() {
   return get_mods() & MOD_MASK_SHIFT;
 }
 
+bool handle_hyper_semi_key(keyrecord_t *record) {
+  static uint16_t hyper_semi_timer;
+  static bool shift_originally_held = false;
+
+  if (record->event.pressed) {
+    shift_originally_held = shift_is_down();
+
+    if (shift_originally_held) return false;
+
+    // ctrl shift alt gui
+    hyper_semi_timer = timer_read();
+    register_mods(MOD_MASK_CSAG);
+  } else if (shift_originally_held) {
+    tap_code(KC_SCOLON);
+  } else {
+    unregister_mods(MOD_MASK_CSAG);
+
+    if (timer_elapsed(hyper_semi_timer) < TAPPING_TERM) {
+      tap_code(KC_SCOLON);
+    }
+  }
+
+  return false;
+}
+
+bool handle_mod_super_key(keyrecord_t *record) {
+  if (record->event.pressed) {
+    register_code(KC_LCTL);
+    register_code(KC_LGUI);
+    register_code(KC_LALT);
+  } else {
+    unregister_code(KC_LCTL);
+    unregister_code(KC_LGUI);
+    unregister_code(KC_LALT);
+  }
+
+  return false;
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   static uint16_t ctrl_raise_timer;
   static bool ctrl_raise_other_key_pressed = false;
-
-  static uint16_t hyper_semi_timer;
-  static bool are_we_hypering = false;
 
   if (keycode != CTRL_OR_RAISE) {
     ctrl_raise_other_key_pressed = true;
@@ -54,48 +92,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
   switch (keycode) {
     case HYPER_SEMI:
-      if (record->event.pressed) {
-        if (shift_is_down()) {
-          are_we_hypering = false;
-
-          // "pass through a colon"
-          SEND_STRING(":");
-        } else {
-          hyper_semi_timer = timer_read();
-          are_we_hypering = true;
-
-          register_code(KC_LCTL);
-          register_code(KC_LGUI);
-          register_code(KC_LALT);
-          register_code(KC_LSHIFT);
-        }
-      } else {
-        if (are_we_hypering && timer_elapsed(hyper_semi_timer) < TAPPING_TERM) {
-          unregister_code(KC_LCTL);
-          unregister_code(KC_LGUI);
-          unregister_code(KC_LALT);
-          unregister_code(KC_LSHIFT);
-
-          SEND_STRING(";");
-        }
-
-        are_we_hypering = false;
-      }
-
-      return false;
+      return handle_hyper_semi_key(record);
 
     case MOD_SUPER:
-      if (record->event.pressed) {
-        register_code(KC_LCTL);
-        register_code(KC_LGUI);
-        register_code(KC_LALT);
-      } else {
-        unregister_code(KC_LCTL);
-        unregister_code(KC_LGUI);
-        unregister_code(KC_LALT);
-      }
-
-      return false;
+      return handle_mod_super_key(record);
 
     case CTRL_OR_RAISE:
       if (record->event.pressed) {
