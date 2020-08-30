@@ -3,7 +3,6 @@
 #define _QWERTY 0
 #define _RAISE 1
 
-// Handle the combination ctrl or raise
 enum custom_keycodes {
   CTRL_OR_RAISE = SAFE_RANGE,
   MOD_SUPER,
