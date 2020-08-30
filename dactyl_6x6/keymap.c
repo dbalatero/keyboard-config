@@ -10,11 +10,14 @@ enum custom_keycodes {
   HYPER_SEMI
 };
 
+static bool ctrl_raise_other_key_pressed = false;
+
 void enable_raise_layer(void);
 void disable_raise_layer(void);
 void toggle_raise_layer(void);
 bool handle_hyper_semi_key(keyrecord_t *record);
 bool handle_mod_super_key(keyrecord_t *record);
+bool handle_ctrl_raise_key(keyrecord_t *record);
 bool shift_is_down(void);
 
 void enable_raise_layer() {
@@ -82,13 +85,28 @@ bool handle_mod_super_key(keyrecord_t *record) {
   return false;
 }
 
-bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+bool handle_ctrl_raise_key(keyrecord_t *record) {
   static uint16_t ctrl_raise_timer;
-  static bool ctrl_raise_other_key_pressed = false;
 
-  if (keycode != CTRL_OR_RAISE) {
-    ctrl_raise_other_key_pressed = true;
+  if (record->event.pressed) {
+    ctrl_raise_timer = timer_read();
+    register_code(KC_LCTL); // Hold down ctrl
+
+    ctrl_raise_other_key_pressed = false;
+  } else {
+    unregister_code(KC_LCTL); // Cancel ctrl being held
+
+    if (timer_elapsed(ctrl_raise_timer) < TAPPING_TERM && !ctrl_raise_other_key_pressed) {
+      // toggle the raise layer on
+      toggle_raise_layer();
+    }
   }
+
+  return false;
+}
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+  if (keycode != CTRL_OR_RAISE) ctrl_raise_other_key_pressed = true;
 
   switch (keycode) {
     case HYPER_SEMI:
@@ -98,21 +116,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       return handle_mod_super_key(record);
 
     case CTRL_OR_RAISE:
-      if (record->event.pressed) {
-        ctrl_raise_timer = timer_read();
-        register_code(KC_LCTL); // Hold down ctrl
-
-        ctrl_raise_other_key_pressed = false;
-      } else {
-        unregister_code(KC_LCTL); // Cancel ctrl being held
-
-        if (timer_elapsed(ctrl_raise_timer) < TAPPING_TERM && !ctrl_raise_other_key_pressed) {
-          // toggle the raise layer on
-          toggle_raise_layer();
-        }
-      }
-
-      return false;
+      return handle_ctrl_raise_key(record);
 
     case KC_ENTER:
     case RAISE_OFF:
