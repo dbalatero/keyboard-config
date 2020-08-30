@@ -44,20 +44,26 @@ bool shift_is_down() {
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   static uint16_t ctrl_raise_timer;
+  static bool ctrl_raise_other_key_pressed = false;
+
   static uint16_t hyper_semi_timer;
-  static bool areWeHypering = false;
+  static bool are_we_hypering = false;
+
+  if (keycode != CTRL_OR_RAISE) {
+    ctrl_raise_other_key_pressed = true;
+  }
 
   switch (keycode) {
     case HYPER_SEMI:
       if (record->event.pressed) {
         if (shift_is_down()) {
-          areWeHypering = false;
+          are_we_hypering = false;
 
           // "pass through a colon"
           SEND_STRING(":");
         } else {
           hyper_semi_timer = timer_read();
-          areWeHypering = true;
+          are_we_hypering = true;
 
           register_code(KC_LCTL);
           register_code(KC_LGUI);
@@ -70,11 +76,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         unregister_code(KC_LALT);
         unregister_code(KC_LSHIFT);
 
-        if (areWeHypering && timer_elapsed(hyper_semi_timer) < TAPPING_TERM) {
+        if (are_we_hypering && timer_elapsed(hyper_semi_timer) < TAPPING_TERM) {
           SEND_STRING(";");
         }
 
-        areWeHypering = false;
+        are_we_hypering = false;
       }
 
       return false;
@@ -96,10 +102,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       if (record->event.pressed) {
         ctrl_raise_timer = timer_read();
         register_code(KC_LCTL); // Hold down ctrl
+
+        ctrl_raise_other_key_pressed = false;
       } else {
         unregister_code(KC_LCTL); // Cancel ctrl being held
 
-        if (timer_elapsed(ctrl_raise_timer) < TAPPING_TERM) {
+        if (timer_elapsed(ctrl_raise_timer) < TAPPING_TERM && !ctrl_raise_other_key_pressed) {
           // toggle the raise layer on
           toggle_raise_layer();
         }
