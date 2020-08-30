@@ -3,15 +3,14 @@
 #define _QWERTY 0
 #define _RAISE 1
 
-#define RAISE TG(_RAISE)
-
 // Combination ctrl when held, enter when tapped
 #define HYPER_SEMI HYPR_T(KC_SCLN)
 
 // Handle the combination ctrl or raise
 enum custom_keycodes {
   CTRL_OR_RAISE = SAFE_RANGE,
-  MOD_SUPER
+  MOD_SUPER,
+  RAISE_OFF
 };
 
 void enable_raise_layer(void);
@@ -19,11 +18,15 @@ void disable_raise_layer(void);
 void toggle_raise_layer(void);
 
 void enable_raise_layer() {
+  if (IS_LAYER_ON(_RAISE)) return;
+
   SEND_STRING(SS_TAP(X_F17));
   layer_on(_RAISE);
 }
 
 void disable_raise_layer() {
+  if (IS_LAYER_OFF(_RAISE)) return;
+
   SEND_STRING(SS_TAP(X_F18));
   layer_off(_RAISE);
 }
@@ -72,12 +75,15 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       if (record->event.pressed) {
         // Turn off the raise layer if you hit Enter (e.g. scrolling through a
         // menu with the arrow keys and you hit Enter)
-        if (IS_LAYER_ON(_RAISE)) {
-          disable_raise_layer();
-        }
+        disable_raise_layer();
       }
 
       return true;
+
+    case RAISE_OFF:
+      if (record->event.pressed) {
+        disable_raise_layer();
+      }
   }
 
   // Pass through all other keys
@@ -116,14 +122,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                         // 3     4                            9        10
                                         KC_LALT, _______,                     _______, MOD_SUPER,
                                           // 5      6                       11    12
-                                          _______, _______,                  KC_F1, RAISE
+                                          _______, _______,                  KC_F1, _______
   ),
 
   [_RAISE] = LAYOUT_6x6(
 
       _______  ,_______,_______   ,_______   ,_______    ,_______,                        _______,_______ ,_______   ,_______   ,_______,_______    ,
       KC__VOLUP,_______,_______   ,_______   ,_______    ,_______,                        _______,_______ ,_______   ,_______   ,_______,KC__VOLDOWN,
-      _______  ,_______,_______   ,KC_MS_UP  ,_______    ,_______,                        _______,_______ ,RAISE     ,_______   ,_______,_______    ,
+      _______  ,_______,_______   ,KC_MS_UP  ,_______    ,_______,                        _______,_______ ,RAISE_OFF ,_______   ,_______,_______    ,
       _______  ,_______,KC_MS_LEFT,KC_MS_DOWN,KC_MS_RIGHT,_______,                        KC_LEFT,KC_DOWN ,KC_UP     ,KC_RGHT   ,_______,_______    ,
       _______  ,_______,_______   ,_______   ,_______    ,_______,                        _______,KC__MUTE,KC_MS_BTN1,KC_MS_BTN2,_______,_______    ,
                         _______,_______,                                                                   _______   ,_______   ,
