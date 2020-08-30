@@ -71,12 +71,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
           register_code(KC_LSHIFT);
         }
       } else {
-        unregister_code(KC_LCTL);
-        unregister_code(KC_LGUI);
-        unregister_code(KC_LALT);
-        unregister_code(KC_LSHIFT);
-
         if (are_we_hypering && timer_elapsed(hyper_semi_timer) < TAPPING_TERM) {
+          unregister_code(KC_LCTL);
+          unregister_code(KC_LGUI);
+          unregister_code(KC_LALT);
+          unregister_code(KC_LSHIFT);
+
           SEND_STRING(";");
         }
 
