@@ -8,7 +8,8 @@
 enum custom_keycodes {
   CTRL_OR_RAISE = SAFE_RANGE,
   MOD_SUPER,
-  RAISE_OFF
+  RAISE_OFF,
+  TOGGLE_RAISE
 };
 
 static bool ctrl_raise_other_key_pressed = false;
@@ -90,12 +91,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       return handle_ctrl_raise_key(record);
 
     case KC_ENTER:
-    case RAISE_OFF:
       if (record->event.pressed) disable_raise_layer();
+      return true;
 
-      // Pass through all keypresses except RAISE_OFF, so that hitting Enter
-      // can also disable the layer.
-      return keycode != RAISE_OFF;
+    case TOGGLE_RAISE:
+      if (record->event.pressed) toggle_raise_layer();
+      return false;
   }
 
   // Pass through all other keys
@@ -130,11 +131,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                         _______, KC_GRAVE,                                                       KC_LBRC, KC_RBRC ,
 
                                       // 1         2                               7          8
-                                      CTRL_OR_RAISE, KC_LGUI,                      KC_BSPACE, KC_SPACE,
+                                      KC_LCTL, KC_LGUI,                      KC_BSPACE, KC_SPACE,
                                         // 3     4                            9        10
                                         KC_LALT, _______,                     _______, MOD_SUPER,
-                                          // 5      6                       11    12
-                                          _______, _______,                  KC_F1, _______
+                                          // 5          6                 11      12
+                                          TOGGLE_RAISE, _______,          KC_F1, TOGGLE_RAISE
   ),
 
   [_RAISE] = LAYOUT_6x6(
