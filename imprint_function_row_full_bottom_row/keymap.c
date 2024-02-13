@@ -5,8 +5,7 @@
 #include QMK_KEYBOARD_H
 
 enum custom_keycodes {
-  MOD_SUPER,
-  TOGGLE_RAISE
+  MOD_SUPER
 };
 
 #define _QWERTY 0
@@ -15,35 +14,7 @@ enum custom_keycodes {
 #define HYPER_SEMI MT(MOD_HYPR, KC_SEMICOLON)
 #define FN_KEY MO(_RAISE)
 
-void enable_raise_layer(void);
-void disable_raise_layer(void);
-void toggle_raise_layer(void);
 bool handle_mod_super_key(keyrecord_t *record);
-
-void enable_raise_layer() {
-  if (IS_LAYER_ON(_RAISE)) return;
-
-  // Send the OS the F17 key so we can toggle the visual indicator
-  SEND_STRING(SS_TAP(X_F17));
-  layer_on(_RAISE);
-}
-
-void disable_raise_layer() {
-  if (IS_LAYER_OFF(_RAISE)) return;
-
-  // Send the OS the F18 key so we can toggle the visual indicator
-  SEND_STRING(SS_TAP(X_F18));
-
-  layer_off(_RAISE);
-}
-
-void toggle_raise_layer() {
-  if (IS_LAYER_ON(_RAISE)) {
-    disable_raise_layer();
-  } else {
-    enable_raise_layer();
-  }
-}
 
 bool handle_mod_super_key(keyrecord_t *record) {
   if (record->event.pressed) {
@@ -63,14 +34,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
     case MOD_SUPER:
       return handle_mod_super_key(record);
-
-    case KC_ENTER:
-      if (record->event.pressed) disable_raise_layer();
-      return true;
-
-    case TOGGLE_RAISE:
-      if (record->event.pressed) toggle_raise_layer();
-      return false;
   }
 
   // Pass through all other keys
